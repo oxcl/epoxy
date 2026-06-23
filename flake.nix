@@ -36,6 +36,8 @@
             pkgs.hyprland
             pkgs.lua5_4
             pkgs.lua-language-server
+            pkgs.grim
+            pkgs.wl-clipboard
           ];
 
           shellHook = ''
