@@ -27,7 +27,7 @@
 
         installPhase = ''
           mkdir -p $out/bin
-          install -Dm755 epoxy.sh $out/bin/epoxy
+          install -Dm755 bin/epoxy $out/bin/epoxy
           wrapProgram $out/bin/epoxy \
             --prefix PATH : ${pkgs.lib.makeBinPath [
               pkgs.hyprland pkgs.foot pkgs.rofi pkgs.pi-coding-agent

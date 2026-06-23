@@ -6,39 +6,29 @@ Before making any changes to this project, read `README.md` to understand what t
 source code of some dependencies are available in `refs/` they are not part of the codebase just provided as reference 
 documentation of some dependencies are available in `docs/` they are not part of the codebase just provided as reference 
 
-## Hyprland
+## SomeWM
 
-Every time you have to do something with Hyprland, you **must**:
+Every time you have to do something with SomeWM, you **must**:
 
-1. Read the file `docs/hyprland.md` in the project root for context and guidelines.
-2. Use web search to look up the latest Hyprland documentation, configuration syntax, or community best practices before implementing anything.
-3. After any change to the Hyprland config, verify it with:
+1. Read the file `docs/somewm-docs` in the project root for context and guidelines.
+2. Use web search to look up the latest SomeWM documentation, configuration syntax, or community best practices before implementing anything.
+3. After any change to the SomeWM config, verify it with:
    ```bash
-   Hyprland -c ~/.config/epoxy/hypr/hyprland.lua --verify-config
+   somewm --check-config .config/epoxy/somewm/rc.lua
    ```
-   This validates the config without starting Hyprland. Never skip this step.
+   This validates the config without starting someWM. Never skip this step.
 
 ## Foot Terminal
 
 Every time you have to do something with Foot terminal, you **must**:
 
-1. Read the file `docs/FOOTS.md` in the project root for context and guidelines.
+1. Read the file `docs/foot-docs` in the project root for context and guidelines.
 2. Use web search to look up the latest Foot documentation, configuration syntax, or community best practices before implementing anything.
 3. After any change to the Foot config, verify it with:
    ```bash
-   foot --check-config
-   ```
-   This validates the config without starting Foot. Exit code 0 means valid, 230 means errors. Never skip this step.
-
-4. For testing specific config files:
-   ```bash
    foot --config=/path/to/foot.ini --check-config
    ```
-
-5. For testing with overrides:
-   ```bash
-   foot --check-config -o "main.font=Fira Code:size=12"
-   ```
+   This validates the config without starting Foot. Exit code 0 means valid, 230 means errors. Never skip this step.
 
 ## Git
 
