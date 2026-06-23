@@ -34,10 +34,45 @@
         "type": "github"
       }
     },
+    "nixpkgs_2": {
+      "locked": {
+        "lastModified": 1771848320,
+        "narHash": "sha256-0MAd+0mun3K/Ns8JATeHT1sX28faLII5hVLq0L3BdZU=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "2fc6539b481e1d2569f25f8799236694180c0993",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "flake-utils": "flake-utils",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "somewm": "somewm"
+      }
+    },
+    "somewm": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_2"
+      },
+      "locked": {
+        "lastModified": 1782143701,
+        "narHash": "sha256-telkGsp8biDHi69KNgwSccKT+6APZKVq2q+erWPU3A0=",
+        "owner": "trip-zip",
+        "repo": "somewm",
+        "rev": "20cf7f3211c58a0707519f4bc98b980c229c12cd",
+        "type": "github"
+      },
+      "original": {
+        "owner": "trip-zip",
+        "repo": "somewm",
+        "type": "github"
       }
     },
     "systems": {

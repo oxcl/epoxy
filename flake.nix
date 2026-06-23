@@ -4,9 +4,10 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+    somewm.url = "github:trip-zip/somewm";
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
+  outputs = { self, nixpkgs, flake-utils, somewm }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
@@ -43,9 +44,13 @@
         };
 
         devShells.default = pkgs.mkShell {
-          buildInputs = [
+          inputsFrom = [
+            somewm.packages.${system}.somewm
+          ];
+
+          packages = [
+            somewm.packages.${system}.somewm
             pkgs.cage
-            pkgs.hyprland
             pkgs.foot
             pkgs.lua5_4
             pkgs.lua-language-server
