@@ -16,7 +16,6 @@ It composes existing, battle-tested applications into a single cohesive environm
 | **Foot** | Terminal emulator |
 | **Rofi** | UI layer — command palette, fuzzy finder, selection menus |
 | **Nix** | Build system — packages all dependencies into one reproducible unit |
-| **Neovide** | Text Editor |
 | **Pi** | Coding Agent |
 | **CloakBrowser** | Integrated Browser |
 | **Cage** | Integrated Compositor |
@@ -65,20 +64,9 @@ SomeWM, rofi CLI, foot's controls — all of these are the same interfaces avail
 
 The environment is designed so that the AI doesn't need special APIs or wrappers. It uses the same tools a human would use, just programmatically.
 
-## Installation
-
-Requires [Nix](https://nixos.org/).
-
-```bash
-nix build
-# or
-nix run
-```
-
 ## Configuration
 
 Epoxy expects its config at `~/.config/epoxy
-
 
 ## For AI Agents
 
