@@ -4,14 +4,12 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
-    hyprland.url = "github:hyprwm/Hyprland";
   };
 
-  outputs = { self, nixpkgs, flake-utils, hyprland }:
+  outputs = { self, nixpkgs, flake-utils }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        hyprland-pkg = hyprland.packages.${system}.hyprland;
       in
       {
         packages.default = pkgs.stdenv.mkDerivation {
@@ -19,7 +17,7 @@
           src = ./.;
 
           propagatedBuildInputs = [
-            hyprland-pkg
+            pkgs.hyprland
           ];
 
           installPhase = ''
