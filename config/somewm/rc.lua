@@ -41,9 +41,146 @@ local layouts = {
     awful.layout.suit.tile,
 }
 
+-- Create taglist and tasklist widgets
+local taglist_buttons = {
+    awful.button({}, 1, function(t) t:view_only() end),
+    awful.button({ modkey }, 1, function(t)
+        if client.focus then
+            client.focus:move_to_tag(t)
+        end
+    end),
+    awful.button({}, 3, function(t) awful.tag.viewtoggle(t) end),
+    awful.button({ modkey }, 3, function(t)
+        if client.focus then
+            client.focus:toggle_tag(t)
+        end
+    end),
+    awful.button({}, 4, function(t) awful.tag.viewnext(t.screen) end),
+    awful.button({}, 5, function(t) awful.tag.viewprev(t.screen) end),
+}
+
+local tasklist_buttons = {
+    awful.button({}, 1, function(c)
+        c:activate({ context = "tasklist", action = "toggle_minimization" })
+    end),
+    awful.button({}, 3, function() awful.menu.client_list({ theme = { width = 250 } }) end),
+    awful.button({}, 4, function() awful.client.focus.byidx(1) end),
+    awful.button({}, 5, function() awful.client.focus.byidx(-1) end),
+}
+
 -- Tags
 awful.screen.connect_for_each_screen(function(s)
     awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, layouts[1])
+    
+    -- Create taglist widget
+    s.mytaglist = awful.widget.taglist {
+        screen = s,
+        filter = awful.widget.taglist.filter.all,
+        buttons = taglist_buttons,
+        style = {
+            shape = gears.shape.rounded_rect,
+            bg_focus = "#879a39",
+            fg_focus = "#fffcf0",
+            bg_urgent = "#af3029",
+            fg_urgent = "#fffcf0",
+            bg_occupied = "#282726",
+            fg_occupied = "#cecdc3",
+            bg_empty = "#1c1b1a",
+            fg_empty = "#575653",
+        },
+        layout = {
+            layout = wibox.layout.fixed.horizontal,
+            spacing = 4,
+        },
+        widget_template = {
+            {
+                {
+                    {
+                        { id = "text_role", widget = wibox.widget.textbox },
+                        layout = wibox.layout.fixed.horizontal,
+                    },
+                    margins = { left = 8, right = 8, top = 2, bottom = 2 },
+                    widget = wibox.container.margin,
+                },
+                id = "background_role",
+                widget = wibox.container.background,
+            },
+            margins = 2,
+            widget = wibox.container.margin,
+        },
+    }
+    
+    -- Create tasklist widget
+    s.mytasklist = awful.widget.tasklist {
+        screen = s,
+        filter = awful.widget.tasklist.filter.currenttags,
+        buttons = tasklist_buttons,
+        style = {
+            shape = gears.shape.rounded_rect,
+            bg_focus = "#282726",
+            fg_focus = "#cecdc3",
+            bg_normal = "#1c1b1a",
+            fg_normal = "#878580",
+            border_width = 1,
+            border_color = "#343331",
+            border_focus = "#879a39",
+        },
+        layout = {
+            layout = wibox.layout.fixed.horizontal,
+            spacing = 4,
+        },
+        widget_template = {
+            {
+                {
+                    {
+                        { id = "icon_role", widget = wibox.widget.imagebox },
+                        { id = "text_role", widget = wibox.widget.textbox },
+                        layout = wibox.layout.fixed.horizontal,
+                    },
+                    margins = { left = 8, right = 8, top = 2, bottom = 2 },
+                    widget = wibox.container.margin,
+                },
+                id = "background_role",
+                widget = wibox.container.background,
+            },
+            margins = 2,
+            widget = wibox.container.margin,
+        },
+    }
+    
+    -- Create wibar (top bar)
+    s.mywibox = awful.wibar {
+        position = "top",
+        screen = s,
+        height = 32,
+        bg = "#100f0f",
+        fg = "#cecdc3",
+        border_width = 1,
+        border_color = "#282726",
+        widget = {
+            layout = wibox.layout.align.horizontal,
+            { -- Left section: taglist
+                layout = wibox.layout.fixed.horizontal,
+                s.mytaglist,
+            },
+            { -- Center section: tasklist
+                layout = wibox.layout.flex.horizontal,
+                s.mytasklist,
+            },
+            { -- Right section: clock, systray, layout
+                layout = wibox.layout.fixed.horizontal,
+                wibox.widget.textclock(),
+                awful.widget.layoutbox {
+                    buttons = {
+                        awful.button({}, 1, function() awful.layout.inc(1) end),
+                        awful.button({}, 3, function() awful.layout.inc(-1) end),
+                        awful.button({}, 4, function() awful.layout.inc(1) end),
+                        awful.button({}, 5, function() awful.layout.inc(-1) end),
+                    }
+                },
+            },
+        },
+    }
 end)
 
 -- Keybindings
