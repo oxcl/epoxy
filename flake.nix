@@ -18,6 +18,7 @@
 
           propagatedBuildInputs = [
             pkgs.hyprland
+            pkgs.foot
           ];
 
           installPhase = ''
@@ -34,6 +35,7 @@
         devShells.default = pkgs.mkShell {
           buildInputs = [
             pkgs.hyprland
+            pkgs.foot
             pkgs.lua5_4
             pkgs.lua-language-server
             pkgs.grim
