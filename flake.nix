@@ -26,6 +26,8 @@
           buildInputs = [
             pkgs.hyprland
             pkgs.foot
+            pkgs.rofi-wayland
+            pkgs.pi-coding-agent
           ];
 
           installPhase = ''
@@ -34,7 +36,7 @@
 
             # Wrap the script so Hyprland and foot are available in PATH
             wrapProgram $out/bin/epoxy \
-              --prefix PATH : ${pkgs.lib.makeBinPath [ pkgs.hyprland pkgs.foot ]}
+              --prefix PATH : ${pkgs.lib.makeBinPath [ pkgs.hyprland pkgs.foot pkgs.rofi-wayland pkgs.pi-coding-agent ]}
           '';
 
           meta = {
@@ -56,6 +58,8 @@
             pkgs.lua-language-server
             pkgs.grim
             pkgs.wl-clipboard
+            pkgs.rofi-wayland
+            pkgs.pi-coding-agent
           ];
 
           shellHook = ''

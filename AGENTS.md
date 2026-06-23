@@ -2,6 +2,10 @@
 
 Before making any changes to this project, read `README.md` to understand what the project is about, its purpose, and overall structure.
 
+
+source code of some dependencies are available in `refs/` they are not part of the codebase just provided as reference 
+documentation of some dependencies are available in `docs/` they are not part of the codebase just provided as reference 
+
 ## Hyprland
 
 Every time you have to do something with Hyprland, you **must**:
