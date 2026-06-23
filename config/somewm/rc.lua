@@ -3,6 +3,23 @@
 -- Libraries
 local awful = require("awful")
 require("awful.autofocus")
+local beautiful = require("beautiful")
+
+-- Initialize theme
+beautiful.init({
+    -- Flexoki colors
+    bg_normal   = "#1C1B1A",  -- base-950
+    fg_normal   = "#B7B5AC",  -- base-300
+    bg_focus    = "#4385BE",  -- blue-400
+    fg_focus    = "#FFFCF0",  -- paper
+    bg_urgent   = "#AF3029",  -- red-600
+    fg_urgent   = "#FFFCF0",  -- paper
+
+    -- Window borders
+    border_width  = 3,
+    border_normal = "#403E3C",  -- base-800
+    border_focus  = "#4385BE",  -- blue-400
+})
 
 -- Default program
 terminal = "foot"
