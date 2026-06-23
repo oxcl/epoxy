@@ -6,21 +6,28 @@ require("awful.autofocus")
 local wibox = require("wibox")
 local beautiful = require("beautiful")
 local ruled = require("ruled")
+local gears = require("gears")
 
 -- Initialize theme
 beautiful.init({
     -- Flexoki colors
     bg_normal   = "#1C1B1A",  -- base-950
     fg_normal   = "#B7B5AC",  -- base-300
-    bg_focus    = "#4385BE",  -- blue-400
+    bg_focus    = "#879A39",  -- green-400
     fg_focus    = "#FFFCF0",  -- paper
     bg_urgent   = "#AF3029",  -- red-600
     fg_urgent   = "#FFFCF0",  -- paper
 
     -- Window borders
-    border_width  = 3,
+    border_width  = 2,
     border_normal = "#403E3C",  -- base-800
-    border_focus  = "#4385BE",  -- blue-400
+    border_focus  = "#879A39",  -- green-400
+
+    -- Gaps
+    useless_gap = 6,
+
+    -- Titlebar
+    titlebar_bg = "#282726",  -- base-900
 })
 
 -- Default program
@@ -72,6 +79,9 @@ ruled.client.connect_signal("request::rules", function()
         rule = {},
         properties = {
             titlebars_enabled = true,
+            shape = function(cr, w, h)
+                gears.shape.partially_rounded_rect(cr, w, h, true, true, false, false, 10)
+            end,
         },
     })
 end)
@@ -82,9 +92,9 @@ client.connect_signal("request::titlebars", function(c)
         markup = '<span color="#AF3029">✕</span>',
         widget = wibox.widget.textbox,
     }
-    awful.titlebar(c).widget = {
+    awful.titlebar(c, { size = 28 }).widget = {
         { awful.titlebar.widget.iconwidget(c), layout = wibox.layout.fixed.horizontal },
-        { { halign = "center", widget = awful.titlebar.widget.titlewidget(c) }, layout = wibox.layout.flex.horizontal },
+        { awful.titlebar.widget.titlewidget(c), layout = wibox.layout.flex.horizontal },
         {
             {
                 close_button,
