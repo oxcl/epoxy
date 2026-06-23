@@ -3,7 +3,9 @@
 -- Libraries
 local awful = require("awful")
 require("awful.autofocus")
+local wibox = require("wibox")
 local beautiful = require("beautiful")
+local ruled = require("ruled")
 
 -- Initialize theme
 beautiful.init({
@@ -62,4 +64,40 @@ client.connect_signal("request::default_mousebindings", function()
             c:activate({ context = "mouse_click", action = "mouse_resize" })
         end),
     })
+end)
+
+-- Client rules
+ruled.client.connect_signal("request::rules", function()
+    ruled.client.append_rule({
+        rule = {},
+        properties = {
+            titlebars_enabled = true,
+        },
+    })
+end)
+
+-- Titlebars
+client.connect_signal("request::titlebars", function(c)
+    local close_button = wibox.widget {
+        markup = '<span color="#AF3029">✕</span>',
+        widget = wibox.widget.textbox,
+    }
+    awful.titlebar(c).widget = {
+        { awful.titlebar.widget.iconwidget(c), layout = wibox.layout.fixed.horizontal },
+        { { halign = "center", widget = awful.titlebar.widget.titlewidget(c) }, layout = wibox.layout.flex.horizontal },
+        {
+            {
+                close_button,
+                margins = 4,
+                widget = wibox.container.margin,
+            },
+            buttons = {
+                awful.button({}, 1, function()
+                    c:kill()
+                end),
+            },
+            layout = wibox.layout.fixed.horizontal()
+        },
+        layout = wibox.layout.align.horizontal
+    }
 end)
