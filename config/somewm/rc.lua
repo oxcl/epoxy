@@ -72,25 +72,28 @@ local tasklist_buttons = {
 awful.screen.connect_for_each_screen(function(s)
     awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, layouts[1])
     
-    -- Create taglist widget
+    -- Create taglist widget (seamless, invisible tabs)
     s.mytaglist = awful.widget.taglist {
         screen = s,
         filter = awful.widget.taglist.filter.all,
         buttons = taglist_buttons,
         style = {
             shape = gears.shape.rounded_rect,
-            bg_focus = "#879a39",
-            fg_focus = "#fffcf0",
+            bg_focus = "#282726",
+            fg_focus = "#575653",
             bg_urgent = "#af3029",
             fg_urgent = "#fffcf0",
-            bg_occupied = "#282726",
-            fg_occupied = "#cecdc3",
-            bg_empty = "#1c1b1a",
-            fg_empty = "#575653",
+            bg_occupied = "transparent",
+            fg_occupied = "#343331",
+            bg_empty = "transparent",
+            fg_empty = "#282726",
+            border_width = 0,
+            border_color = "transparent",
+            font = "sans 10",
         },
         layout = {
             layout = wibox.layout.fixed.horizontal,
-            spacing = 4,
+            spacing = 0,
         },
         widget_template = {
             {
@@ -99,35 +102,36 @@ awful.screen.connect_for_each_screen(function(s)
                         { id = "text_role", widget = wibox.widget.textbox },
                         layout = wibox.layout.fixed.horizontal,
                     },
-                    margins = { left = 8, right = 8, top = 2, bottom = 2 },
+                    margins = { left = 4, right = 4, top = 0, bottom = 0 },
                     widget = wibox.container.margin,
                 },
                 id = "background_role",
                 widget = wibox.container.background,
             },
-            margins = 2,
+            margins = { top = 2, bottom = 2, left = 0, right = 0 },
             widget = wibox.container.margin,
         },
     }
     
-    -- Create tasklist widget
+    -- Create tasklist widget (seamless, like Wave Terminal)
     s.mytasklist = awful.widget.tasklist {
         screen = s,
         filter = awful.widget.tasklist.filter.currenttags,
         buttons = tasklist_buttons,
         style = {
             shape = gears.shape.rounded_rect,
-            bg_focus = "#282726",
-            fg_focus = "#cecdc3",
-            bg_normal = "#1c1b1a",
-            fg_normal = "#878580",
-            border_width = 1,
-            border_color = "#343331",
-            border_focus = "#879a39",
+            bg_focus = "transparent",
+            fg_focus = "#403e3c",
+            bg_normal = "transparent",
+            fg_normal = "#282726",
+            border_width = 0,
+            border_color = "transparent",
+            border_focus = "transparent",
+            font = "sans 10",
         },
         layout = {
             layout = wibox.layout.fixed.horizontal,
-            spacing = 4,
+            spacing = 0,
         },
         widget_template = {
             {
@@ -137,46 +141,46 @@ awful.screen.connect_for_each_screen(function(s)
                         { id = "text_role", widget = wibox.widget.textbox },
                         layout = wibox.layout.fixed.horizontal,
                     },
-                    margins = { left = 8, right = 8, top = 2, bottom = 2 },
+                    margins = { left = 4, right = 4, top = 0, bottom = 0 },
                     widget = wibox.container.margin,
                 },
                 id = "background_role",
                 widget = wibox.container.background,
             },
-            margins = 2,
+            margins = { top = 2, bottom = 2, left = 0, right = 0 },
             widget = wibox.container.margin,
         },
     }
     
-    -- Create wibar (top bar)
+    -- Create wibar (top bar - completely seamless like Wave Terminal)
     s.mywibox = awful.wibar {
         position = "top",
         screen = s,
-        height = 32,
-        bg = "#100f0f",
+        height = 20,
+        bg = "#1c1b1a",
         fg = "#cecdc3",
-        border_width = 1,
-        border_color = "#282726",
+        border_width = 0,
         widget = {
             layout = wibox.layout.align.horizontal,
             { -- Left section: taglist
                 layout = wibox.layout.fixed.horizontal,
-                s.mytaglist,
+                {
+                    widget = wibox.container.margin,
+                    margins = { left = 4, right = 0, top = 0, bottom = 0 },
+                    s.mytaglist,
+                },
             },
             { -- Center section: tasklist
                 layout = wibox.layout.flex.horizontal,
                 s.mytasklist,
             },
-            { -- Right section: clock, systray, layout
+            { -- Right section: clock
                 layout = wibox.layout.fixed.horizontal,
-                wibox.widget.textclock(),
-                awful.widget.layoutbox {
-                    buttons = {
-                        awful.button({}, 1, function() awful.layout.inc(1) end),
-                        awful.button({}, 3, function() awful.layout.inc(-1) end),
-                        awful.button({}, 4, function() awful.layout.inc(1) end),
-                        awful.button({}, 5, function() awful.layout.inc(-1) end),
-                    }
+                {
+                    widget = wibox.widget.textclock,
+                    format = "%H:%M",
+                    font = "sans 9",
+                    fg = "#343331",
                 },
             },
         },
@@ -223,28 +227,70 @@ ruled.client.connect_signal("request::rules", function()
     })
 end)
 
--- Titlebars
+-- Titlebars (Wave Terminal block header style)
 client.connect_signal("request::titlebars", function(c)
+    -- Close button (subtle × like Wave Terminal)
     local close_button = wibox.widget {
-        markup = '<span color="#AF3029">✕</span>',
+        markup = '<span font="sans 11" color="#575653">×</span>',
         widget = wibox.widget.textbox,
+        buttons = {
+            awful.button({}, 1, function()
+                c:kill()
+            end),
+        },
     }
-    awful.titlebar(c, { size = 28 }).widget = {
-        { awful.titlebar.widget.iconwidget(c), layout = wibox.layout.fixed.horizontal },
-        { awful.titlebar.widget.titlewidget(c), layout = wibox.layout.flex.horizontal },
-        {
+
+    -- Maximize/expand button (subtle arrows like Wave Terminal)
+    local maximize_button = wibox.widget {
+        markup = '<span font="sans 9" color="#575653">⤢</span>',
+        widget = wibox.widget.textbox,
+        buttons = {
+            awful.button({}, 1, function()
+                c.maximized = not c.maximized
+                c:raise()
+            end),
+        },
+    }
+
+    -- Settings/gear button (subtle cog like Wave Terminal)
+    local settings_button = wibox.widget {
+        markup = '<span font="sans 9" color="#575653">⚙</span>',
+        widget = wibox.widget.textbox,
+        buttons = {
+            awful.button({}, 1, function()
+                -- Could open settings menu
+            end),
+        },
+    }
+
+    awful.titlebar(c, { size = 24, bg = "#1c1b1a" }).widget = {
+        { -- Left: icon and title (like Wave Terminal block headers)
             {
-                close_button,
-                margins = 4,
+                widget = awful.titlebar.widget.iconwidget(c),
+            },
+            {
+                widget = awful.titlebar.widget.titlewidget(c),
+                font = "sans 10",
+            },
+            layout = wibox.layout.fixed.horizontal,
+        },
+        { -- Center: empty
+            layout = wibox.layout.fixed.horizontal,
+        },
+        { -- Right: block controls (expand, settings, close - like Wave Terminal)
+            {
+                {
+                    maximize_button,
+                    settings_button,
+                    close_button,
+                    layout = wibox.layout.fixed.horizontal,
+                    spacing = 6,
+                },
+                margins = { left = 0, right = 4, top = 0, bottom = 0 },
                 widget = wibox.container.margin,
             },
-            buttons = {
-                awful.button({}, 1, function()
-                    c:kill()
-                end),
-            },
-            layout = wibox.layout.fixed.horizontal()
+            layout = wibox.layout.fixed.horizontal,
         },
-        layout = wibox.layout.align.horizontal
+        layout = wibox.layout.align.horizontal,
     }
 end)
