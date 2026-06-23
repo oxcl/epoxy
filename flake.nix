@@ -12,6 +12,8 @@
         pkgs = nixpkgs.legacyPackages.${system};
       in
       {
+        packages.cage = pkgs.cage;
+
         packages.default = pkgs.stdenv.mkDerivation {
           name = "epoxy";
           src = ./.;
@@ -42,6 +44,7 @@
 
         devShells.default = pkgs.mkShell {
           buildInputs = [
+            pkgs.cage
             pkgs.hyprland
             pkgs.foot
             pkgs.lua5_4

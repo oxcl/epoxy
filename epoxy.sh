@@ -7,4 +7,4 @@ if [ ! -f "$CONFIG_FILE" ]; then
   exit 1
 fi
 
-exec Hyprland -c "$CONFIG_FILE"
+exec start-hyprland -- -c "$CONFIG_FILE"
