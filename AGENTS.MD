@@ -4,10 +4,15 @@ Before making any changes to this project, read `README.md` to understand what t
 
 ## Hyprland
 
-Every time an you have to do something with Hyprland, you **must**:
+Every time you have to do something with Hyprland, you **must**:
 
 1. Read the file `docs/hyprland.md` in the project root for context and guidelines.
 2. Use web search to look up the latest Hyprland documentation, configuration syntax, or community best practices before implementing anything.
+3. After any change to the Hyprland config, verify it with:
+   ```bash
+   Hyprland -c ~/.config/epoxy/hypr/hyprland.lua --verify-config
+   ```
+   This validates the config without starting Hyprland. Never skip this step.
 
 ## Symlinks
 
