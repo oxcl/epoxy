@@ -16,7 +16,11 @@
           name = "epoxy";
           src = ./.;
 
-          propagatedBuildInputs = [
+          nativeBuildInputs = [
+            pkgs.makeWrapper
+          ];
+
+          buildInputs = [
             pkgs.hyprland
             pkgs.foot
           ];
@@ -24,6 +28,10 @@
           installPhase = ''
             mkdir -p $out/bin
             install -Dm755 epoxy.sh $out/bin/epoxy
+
+            # Wrap the script so Hyprland and foot are available in PATH
+            wrapProgram $out/bin/epoxy \
+              --prefix PATH : ${pkgs.lib.makeBinPath [ pkgs.hyprland pkgs.foot ]}
           '';
 
           meta = {
