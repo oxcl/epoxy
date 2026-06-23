@@ -24,20 +24,7 @@
 
           installPhase = ''
             mkdir -p $out/bin
-
-            cat > $out/bin/epoxy << 'SCRIPT'
-#!/bin/sh
-CONFIG_FILE="$HOME/.config/epoxy/hypr/hyprland.lua"
-
-if [ ! -f "$CONFIG_FILE" ]; then
-  echo "Config not found: $CONFIG_FILE"
-  exit 1
-fi
-
-exec Hyprland -c "$CONFIG_FILE"
-SCRIPT
-
-            chmod +x $out/bin/epoxy
+            install -Dm755 epoxy.sh $out/bin/epoxy
           '';
 
           meta = {
