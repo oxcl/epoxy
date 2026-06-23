@@ -1,186 +1,24 @@
 #!/usr/bin/env bash
-# epoxy - launch a nested somewm compositor with IPC orchestration.
+# epoxy - launch a nested somewm compositor via somewm-client test.
 #
-# Manages environment setup, socket readiness, PID tracking, and clean shutdown.
+# Uses the built-in test orchestrator for lifecycle management.
 
 set -euo pipefail
 
-# --- Config ---
-EPOXY_STATE_DIR_NAME="epoxy"
-SOMEWM_WAIT_TIMEOUT_SEC=30
-POLL_INTERVAL_SEC=0.05
-STOP_GRACE_SEC=5
-KILL_GRACE_SEC=2
-
-# --- Resolve paths ---
 CONFIG="${EPoxy_CONFIG:-${XDG_CONFIG_HOME:-$HOME/.config}/epoxy/somewm/rc.lua}"
+INSTANCE_NAME="epoxy"
 
-# --- Helpers ---
-die() { echo "Error: $*" >&2; exit 1; }
+# Clean up any previous instance
+somewm-client test stop --name "$INSTANCE_NAME" 2>/dev/null || true
 
-runtime_dir() {
-    local rd="${XDG_RUNTIME_DIR:-}"
-    [[ -n "$rd" ]] || die "XDG_RUNTIME_DIR not set"
-    echo "$rd"
-}
+# Launch (headless by default — wayland nested is broken in this env)
+echo "Starting somewm..."
+WLR_RENDERER=pixman somewm-client test start \
+    --name "$INSTANCE_NAME" \
+    --host headless \
+    --config "$CONFIG"
 
-state_dir() {
-    echo "$(runtime_dir)/$EPOXY_STATE_DIR_NAME"
-}
-
-pid_alive() {
-    local pid=$1
-    (( pid > 1 )) && kill -0 "$pid" 2>/dev/null
-}
-
-try_ping_socket() {
-    local sock_path=$1
-    # Use nc to connect, send ping, check for response
-    local response
-    response=$(echo "ping" | nc -U "$sock_path" -w 1 2>/dev/null) || return 1
-    [[ -n "$response" ]]
-}
-
-wait_for_socket() {
-    local sock_path=$1
-    local timeout_sec=$2
-    local child_pid=$3
-    local elapsed=0
-
-    while (( elapsed < timeout_sec )); do
-        if try_ping_socket "$sock_path"; then
-            return 0
-        fi
-
-        # Check if child died
-        if ! pid_alive "$child_pid"; then
-            die "somewm exited before IPC was ready"
-        fi
-
-        sleep "$POLL_INTERVAL_SEC"
-        elapsed=$(echo "$elapsed + $POLL_INTERVAL_SEC" | bc 2>/dev/null || echo "$((elapsed + 1))")
-    done
-
-    die "Timed out waiting for IPC socket at $sock_path"
-}
-
-kill_and_wait() {
-    local pid=$1
-    local sock_path=${2:-}
-
-    pid_alive "$pid" || return 0
-
-    # SIGTERM
-    kill -TERM "$pid" 2>/dev/null || true
-    local elapsed=0
-    while (( elapsed < STOP_GRACE_SEC )); do
-        pid_alive "$pid" || return 0
-        [[ -n "$sock_path" && ! -S "$sock_path" ]] && break
-        sleep "$POLL_INTERVAL_SEC"
-        elapsed=$(echo "$elapsed + $POLL_INTERVAL_SEC" | bc 2>/dev/null || echo "$((elapsed + 1))")
-    done
-
-    pid_alive "$pid" || return 0
-
-    # SIGKILL
-    kill -KILL "$pid" 2>/dev/null || true
-    elapsed=0
-    while (( elapsed < KILL_GRACE_SEC )); do
-        pid_alive "$pid" || return 0
-        sleep "$POLL_INTERVAL_SEC"
-        elapsed=$(echo "$elapsed + $POLL_INTERVAL_SEC" | bc 2>/dev/null || echo "$((elapsed + 1))")
-    done
-
-    pid_alive "$pid" && return 1 || return 0
-}
-
-cleanup() {
-    local sdir
-    sdir="$(state_dir)"
-    if [[ -d "$sdir" ]]; then
-        local pid_file="$sdir/pid"
-        if [[ -f "$pid_file" ]]; then
-            local pid
-            pid=$(<"$pid_file")
-            kill_and_wait "$pid" "$sdir/ipc.sock" 2>/dev/null || true
-        fi
-        rm -rf "$sdir"
-    fi
-}
-
-# --- Main ---
-main() {
-    local sdir
-    sdir="$(state_dir)"
-
-    # Clean up any previous instance
-    cleanup 2>/dev/null || true
-    mkdir -p "$sdir"
-
-    # Resolve config to absolute path
-    [[ -f "$CONFIG" ]] || die "Config not found: $CONFIG"
-    CONFIG="$(realpath "$CONFIG")"
-
-    # Detect host mode
-    local host_mode="headless"
-    if [[ -n "${WAYLAND_DISPLAY:-}" ]]; then
-        host_mode="wayland"
-    elif [[ -n "${DISPLAY:-}" ]]; then
-        host_mode="x11"
-    fi
-
-    # Set environment for nested compositor
-    export XDG_RUNTIME_DIR="$sdir/runtime"
-    mkdir -p "$XDG_RUNTIME_DIR" 2>/dev/null || true
-    export SOMEWM_SOCKET="$sdir/ipc.sock"
-
-    case "$host_mode" in
-        wayland)
-            export WLR_BACKENDS="wayland"
-            export WLR_WL_OUTPUTS="${WLR_WL_OUTPUTS:-1}"
-            ;;
-        x11)
-            export WLR_BACKENDS="x11"
-            export WLR_X11_OUTPUTS="${WLR_X11_OUTPUTS:-1}"
-            ;;
-        headless)
-            export WLR_BACKENDS="headless"
-            export WLR_RENDERER="pixman"
-            export WLR_WL_OUTPUTS="${WLR_WL_OUTPUTS:-1}"
-            ;;
-    esac
-
-    # Log file
-    local log_file="$sdir/log"
-
-    # Fork compositor
-    somewm -c "$CONFIG" >"$log_file" 2>&1 &
-    local pid=$!
-
-    # Write PID file
-    echo "$pid" > "$sdir/pid"
-
-    # Wait for IPC socket
-    echo "Waiting for somewm IPC..."
-    wait_for_socket "$sdir/ipc.sock" "$SOMEWM_WAIT_TIMEOUT_SEC" "$pid"
-
-    # Check for FATAL errors in log
-    if grep -q "FATAL:" "$log_file" 2>/dev/null; then
-        local fatal_line
-        fatal_line=$(grep "FATAL:" "$log_file" | head -1)
-        die "somewm reported: $fatal_line"
-    fi
-
-    echo "somewm ready (pid $pid, host: $host_mode)"
-    echo "  config:  $CONFIG"
-    echo "  socket:  $sdir/ipc.sock"
-    echo "  log:     $log_file"
-
-    # Trap signals for clean shutdown
-    trap cleanup EXIT INT TERM
-
-    # Wait for compositor to exit
-    wait "$pid" 2>/dev/null || true
-}
-
-main "$@"
+echo ""
+echo "To stop:  somewm-client test stop --name $INSTANCE_NAME"
+echo "To eval:  somewm-client test eval --name $INSTANCE_NAME 'return #screen'"
+echo "To logs:  somewm-client test logs --name $INSTANCE_NAME -f"
