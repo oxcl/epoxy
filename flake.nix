@@ -30,5 +30,17 @@
             mainProgram = "epoxy";
           };
         };
+
+        devShells.default = pkgs.mkShell {
+          buildInputs = [
+            pkgs.hyprland
+            pkgs.lua5_4
+            pkgs.lua-language-server
+          ];
+
+          shellHook = ''
+            echo "epoxy dev shell loaded"
+          '';
+        };
       });
 }
