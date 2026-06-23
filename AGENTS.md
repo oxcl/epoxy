@@ -40,3 +40,7 @@ This project uses symlinks to integrate with the user's system:
 
 - The `.bin` file is symlinked to the user's path so that `epoxy` can be run from anywhere as a command.
 - The `config/` directory in this project is gitignored and symlinked to the user's config directory for epoxy, so the project treats the config file as the user's config directory. it is symlinked to ~/.config/epoxy
+
+
+## Theme
+the project uses the flexoki theme. the themes are accessible in refs/flexoki you have to adapt the colors from the reference for the specific thing you are doing
